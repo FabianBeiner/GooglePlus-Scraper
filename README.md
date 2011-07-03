@@ -5,9 +5,25 @@ v1.0
 
 The technique used is called “web scraping” (see [Wikipedia](http://en.wikipedia.org/wiki/Web_scraping "Web scraping") for details). That means: If Google+ changes anything on their HTML, the script is going to fail.
 
-## Author
+## Read this!
+
+I recommend not to use this script in any productive environment, just because it is not really tested. I've written this within two or three hours, that's it.
+
+Yes, it is possible to extend the stuff available to fetch, but I'm bored now and won't go on. Feel free to do so! :)
+
+## Imaginary things to do
+* Caching!
+* Posting stuff to automatically on Twitter/Facebook (through Cronjob)
+* Better regular expressions
+* …
+
+### Author
 [Fabian Beiner](http://wwww.twitter.com/FabianBeiner)
 
-## License
+### License
 
 [Attribution-NonCommercial-ShareAlike 3.0 Germany (CC BY-NC-SA 3.0) ](http://creativecommons.org/licenses/by-nc-sa/3.0/de/deed.en)
+
+## Example output (of googleplus.example.php)
+
+![Screenshot](http://i52.tinypic.com/9ubxom.png "Screenshot of googleplus.example.php output")
