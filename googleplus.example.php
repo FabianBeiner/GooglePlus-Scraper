@@ -22,6 +22,7 @@
       margin:20px 0;
     }
   </style>
+  <link rel="alternate" type="application/rss+xml" title="G+ Posts RSS 2.0" href="feed.php" />
 </head>
 <body>
 <?php
