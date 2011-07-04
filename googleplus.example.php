@@ -28,7 +28,7 @@
 <?php
     require_once 'googleplus.class.php';
 
-    $arrTests = array('https://plus.google.com/107117483540235115863/posts', 'https://plus.google.com/106189723444098348646/posts', 'https://plus.google.com/111091089527727420853/posts', '109813896768294978296', '109412257237874861202');
+    $arrTests = array('https://plus.google.com/117918784076966584831/posts', 'https://plus.google.com/107117483540235115863/posts', 'https://plus.google.com/106189723444098348646/posts', 'https://plus.google.com/111091089527727420853/posts', '109813896768294978296', '109412257237874861202');
 
     foreach ($arrTests as $strTest) {
         $oGooglePlus = new GooglePlus($strTest);
