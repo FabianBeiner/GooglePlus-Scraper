@@ -18,7 +18,7 @@
  * @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Germany
  *             (http://creativecommons.org/licenses/by-nc-sa/3.0/de/deed.en)
  * @link       http://fabian-beiner.de
- * @version    1.0
+ * @version    1.0.1
 */
 
 class GooglePlusException extends Exception {}
@@ -93,9 +93,9 @@ class GooglePlus {
         $arrMatches = null;
         preg_match_all($strRegex, $strContent, $arrMatches);
         if (GooglePlus::GPLUS_DEBUG) {
-            //echo '<pre style="font-size:10px">--- DEBUG' . "\n";
-            //print_r($arrMatches);
-            //echo '--- /DEBUG</pre>';
+            echo '<pre style="font-size:10px">--- DEBUG' . "\n";
+            print_r($arrMatches);
+            echo '--- /DEBUG</pre>';
         }
         if ($arrMatches === FALSE) return false;
         if ($intIndex != null && is_int($intIndex)) {
@@ -207,6 +207,7 @@ class GooglePlus {
                 $arrReturn = array();
                 foreach ($arrFetch[1] as $strPost) {
                     $strPost = str_replace('<br>', ' ', $strPost);
+                    $strPost = str_replace('<br />', ' ', $strPost);
                     $strPost = html_entity_decode(strip_tags($strPost), ENT_QUOTES);
                     $arrReturn[] = $strPost;
                 }
