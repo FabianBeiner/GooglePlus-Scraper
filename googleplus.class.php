@@ -18,7 +18,7 @@
  * @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Germany
  *             (http://creativecommons.org/licenses/by-nc-sa/3.0/de/deed.en)
  * @link       http://fabian-beiner.de
- * @version    1.0.1
+ * @version    1.0.2
 */
 
 class GooglePlusException extends Exception {}
@@ -116,6 +116,7 @@ class GooglePlus {
     public function getShortText($strText, $intLength = 100, $bolDots = false) {
         $strText = trim($strText) . ' ';
         $strText = substr($strText, 0, $intLength);
+        $strText = preg_replace( "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", '', $strText );
         $strText = substr($strText, 0, strrpos($strText, ' '));
         return ($bolDots) ? $strText . '&hellip;' : $strText;
     }
