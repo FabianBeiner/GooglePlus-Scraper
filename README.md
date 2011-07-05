@@ -1,5 +1,5 @@
 # GooglePlus-Scraper
-v1.0.1
+v1.0.2
 
 **This class can be used to retrieve data from a Google+ profile with PHP. It is rather a proof of concept than something for productive use.**
 
@@ -17,8 +17,8 @@ Yes, it is possible to extend the stuff available to fetch, but I'm bored now an
 * Better regular expressions
 * …
 
-### Authors
-* [Fabian Beiner](http://wwww.twitter.com/FabianBeiner) *(Google+ Scraper)*
+### Contributors
+* [Fabian Beiner](http://wwww.twitter.com/FabianBeiner) *(GooglePlus-Scraper)*
 * [Frank Bültge](http://twitter.com//bueltge) *(RSS-Feed)*
 
 ### License
