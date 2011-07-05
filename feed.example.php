@@ -36,12 +36,12 @@ foreach ( $arrTests as $strTest ) {
 		);
 		foreach ($arrPosts as $strPost) {
 			$item = array();
-			$item['title']       = $strPost;
+			$item['title']       = $oGooglePlus -> getShortText( $strPost, 120, TRUE );
 			if ( $arrLinks[$i] )
-				$item['link']      = 'https://plus.google.com/' . $oGooglePlus -> strProfileId . '/posts/' . $arrLinks[$i];
+				$item['link']    = 'https://plus.google.com/' . $oGooglePlus -> strProfileId . '/posts/' . $arrLinks[$i];
 			$item['description'] = $strPost;
 			if ( $arrLinks[$i] )
-				$item['guid']      = 'https://plus.google.com/' . $oGooglePlus -> strProfileId . '/posts/' . $arrLinks[$i];
+				$item['guid']    = 'https://plus.google.com/' . $oGooglePlus -> strProfileId . '/posts/' . $arrLinks[$i];
 			//$item['date'] = date('Y-m-d');
 
 			$w->add_item($item);
