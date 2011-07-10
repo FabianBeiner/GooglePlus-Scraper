@@ -7,7 +7,7 @@
  *
  * The technique used is called “web scraping”
  * (see http://en.wikipedia.org/wiki/Web_scraping for details). That means:
- * If Google+ changes anything on their HTML, the script is going to fail.
+ * If Google+ changes anything on their HTML/JSON, the script is going to fail.
  *
  *
  * Can't wait to get my fingers on the official API. :)
@@ -18,7 +18,7 @@
  * @license    Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Germany
  *             (http://creativecommons.org/licenses/by-nc-sa/3.0/de/deed.en)
  * @link       http://fabian-beiner.de
- * @version    1.0.2
+ * @version    1.1.0
 */
 
 class GooglePlusException extends Exception {}
@@ -31,26 +31,16 @@ class GooglePlus {
     // Set this to 'true' for debugging purposes only.
     const GPLUS_DEBUG   = false;
 
-    // Regular expressions. Don't touch them, unless you know, what you're doing!
-    const GPLUS_CONTENT      = '~<div class="a-f-i-p-r"><div class="a-f-i-p-qb a-b-f-i-p-qb"><div class="(?:a-b-f-i-u-ki a-f-i-u-ki|a-b-f-i-p-xb a-f-i-p-xb)"><div(?:.*)>(.*)</div></div>~Ui';
-    const GPLUS_INTRODUCTION = '~<div class="a-c-B-F-Oa d-s-r note">(.*)</div>~Ui';
-    const GPLUS_NAME         = '~<div class="a-c-da-G a-c-nc-M-i a-b-c-da-T-mb"><span class="fn">(.*)</span></div>~Ui';
-    const GPLUS_OCCUPATION   = '~<div class="a-c-B-F-Oa d-s-r title">(.*)</div>~Ui';
-    const GPLUS_PROFILE_ID   = '~(\d{21})~Ui';
-    const GPLUS_PROFILE_URL  = '~https://plus.google.com/(\d{21}|\w+)\/~Ui';
-
     // cURL cookie file.
-    private $_fCookie         = NULL;
+    private $_fCookie    = NULL;
     // Google+ url.
-    private $_strUrl          = NULL;
-    // Google+ source for posts.
-    private $_strSourcePosts  = NULL;
-    // Google+ source for about.
-    private $_strSourceAbout  = NULL;
+    private $_strUrl     = NULL;
+    // Google+ source.
+    private $_strSource  = NULL;
+    // Google+ JSON.
+    private $_objJson    = NULL;
     // Fetching successful?
-    public $isReady           = false;
-    // Google+ profile id/name.
-    public $strProfileId      = NULL;
+    public $isReady      = false;
 
     /**
      * GooglePlus constructor.
@@ -73,10 +63,11 @@ class GooglePlus {
             ini_set('display_errors', 0);
         }
         // Set the global cache timeout (fallback to 4 hours if the value is crap).
-        $this->_intCache = (int)$intCache || 240;
+        $this->_intCache = (is_int($intCache)) ? $intCache : 240;
         // Fetch the HTML of the page.
         if (!GooglePlus::fetchUrl($strProfile)) {
-            throw new GooglePlusException('Error fetching the HTML of this Google+ profile.');
+            //throw new GooglePlusException('Error fetching the HTML of this Google+ profile.');
+            echo 'Failed';
         }
     }
 
@@ -94,7 +85,7 @@ class GooglePlus {
         preg_match_all($strRegex, $strContent, $arrMatches);
         if (GooglePlus::GPLUS_DEBUG) {
             echo '<pre style="font-size:10px">--- DEBUG' . "\n";
-            print_r($arrMatches);
+            var_dump($arrMatches);
             echo '--- /DEBUG</pre>';
         }
         if ($arrMatches === FALSE) return false;
@@ -134,21 +125,37 @@ class GooglePlus {
      * @param  string  $strWhat Either 'posts' or 'about' (Google+ pages)
      * @return boolean
      */
-    private function fetchUrl($strProfile, $strWhat = 'posts') {
+    private function fetchUrl($strProfile) {
         // Remove whitespaces and possible HTML stuff.
         $strProfile = trim(strip_tags((string)$strProfile));
 
         // Find a proper Google+ id.
-        $this->strProfileId = $this->matchRegex($strProfile, GooglePlus::GPLUS_PROFILE_ID, 1);
-        if (!$this->strProfileId) {
-            $this->strProfileId = $this->matchRegex($strProfile, GooglePlus::GPLUS_PROFILE_URL);
+        $strProfileId = $this->matchRegex($strProfile, '~(\d{21})~Ui', 1);
+        if (!$strProfileId) {
+            $strProfileId = $this->matchRegex($strProfile, '~https://plus.google.com/(\d{21}|\w+)\/~Ui');
         }
-        if (!$this->strProfileId) {
+        if (!$strProfileId) {
             throw new GooglePlusException('Unable to find a Google+ id.');
         }
 
+        // Simple cache handling.
+        $strCache = getcwd() . '/cache/' . $strProfileId . '.json';
+        if (file_exists($strCache)) {
+            $intChanged = filemtime($strCache);
+            $intNow     = time();
+            $intDiff    = $intNow - $intChanged;
+            $intCache   = $this->_intCache * 60;
+            if ($intCache >= $intDiff) {
+                $this->_objJson = json_decode(file_get_contents($strCache), true);
+                if ($this->_objJson) {
+                    $this->isReady = true;
+                    return true;
+                }
+            }
+        }
+
         // Set the URL.
-        $this->_strUrl = 'https://plus.google.com/' . $this->strProfileId . '/posts';
+        $this->_strUrl = 'https://plus.google.com/' . $strProfileId . '/posts';
 
         // Cookie path.
         if (function_exists('sys_get_temp_dir')) {
@@ -181,103 +188,97 @@ class GooglePlus {
         }
 
         if ($intCurlErr > 0) {
-            $this->isReady = false;
             throw new GooglePlusException('cURL error (' . $intCurlErr . '):' .  $strCurlErr);
-        }
-        else {
-            $this->isReady = true;
         }
 
         // Remove line breaks.
-        if ($strWhat == 'about') {
-            $this->_strSourceAbout = preg_replace('~(\r|\n|\r\n)~', '', $strSource);
-        } else {
-            $this->_strSourcePosts = preg_replace('~(\r|\n|\r\n)~', '', $strSource);
-        }
+        $this->_strSource = preg_replace('~(\r|\n|\r\n)~', '', $strSource);
 
-        return true;
+        $intStart = strpos($this->_strSource, 'var OZ_initData = ');
+        $intEnd   = strpos($this->_strSource, ";window.jstiming.load.tick('idp');</script>", $intStart);
+        $strJson  = substr($this->_strSource, ($intStart + 18), -(strlen($this->_strSource) - $intEnd));
+
+        // This paves the way to coding hell.
+        $strJson = preg_replace('~(,){2,}~', ',', $strJson);
+        $strJson = str_replace('[,', '[', $strJson);
+
+        file_put_contents($strCache, $strJson);
+        $this->_objJson = json_decode($strJson, true);
+        if ($this->_objJson) {
+            $this->isReady = true;
+            return true;
+        }
+        return false;
     }
 
-    public function getName() {
-        if ($this->isReady) {
-            if ($strName = $this->matchRegex($this->_strSourcePosts, GooglePlus::GPLUS_NAME, 1)) {
-                return trim($strName);
-            }
-            return $this->strNotFound;
+    public function get($strWhat) {
+        if (!$strWhat) {
+            throw new GooglePlusException('Methode get() needs a parameter: name, id, url');
         }
-        return $this->strNotFound;
-    }
-
-    public function getPosts() {
         if ($this->isReady) {
-            if ($arrFetch = $this->matchRegex($this->_strSourcePosts, GooglePlus::GPLUS_CONTENT)) {
-                $arrReturn = array();
-                foreach ($arrFetch[1] as $strPost) {
-                    $strPost = str_replace('<br>', ' ', $strPost);
-                    $strPost = str_replace('<br />', ' ', $strPost);
-                    $strPost = html_entity_decode(strip_tags($strPost), ENT_QUOTES);
-                    $arrReturn[] = $strPost;
-                }
-                return $arrReturn;
-            }
-            return $this->strNotFound;
-        }
-        return $this->strNotFound;
-    }
-
-    public function getLinks() {
-        if ($this->isReady) {
-            // Dirty dirty… This fails sometimes.
-            $arrPosts  = $this->getPosts();
-            $arrReturn = array();
-            $i         = 0;
-            foreach ($arrPosts as $strPost) {
-                $strRegex  = '~,"(?:' . $this->getShortText($strPost, 30) . '.*)","' . $this->strProfileId . '/posts/(\w+)",0~Ui';
-                if ($strUrl = $this->matchRegex($this->_strSourcePosts, $strRegex)) {
-                    if (isset($strUrl[1][0])) {
-                        $arrReturn[$i] = $strUrl[1][0];
+            switch(strtolower(trim($strWhat))) {
+                case 'name':
+                    $strReturn = $this->_objJson[5][2][2][3];
+                    break;
+                case 'id':
+                    $strReturn = $this->_objJson[5][0];
+                    break;
+                case 'url':
+                    $strReturn = $this->_objJson[5][2][0];
+                    break;
+                case 'image':
+                    $strReturn = $this->_objJson[5][2][1];
+                    break;
+                case 'firstname':
+                    $strReturn = $this->_objJson[5][2][2][1];
+                    break;
+                case 'lastname':
+                    $strReturn = $this->_objJson[5][2][2][2];
+                    break;
+                case 'nickname':
+                    $strReturn = $this->_objJson[5][2][34][1];
+                    break;
+                case 'othernames':
+                    $strReturn = $this->_objJson[5][2][3][1][0][0];
+                    break;
+                case 'description':
+                    $strReturn = $this->_objJson[5][2][24][1];
+                    break;
+                case 'occupation':
+                    $strReturn = $this->_objJson[5][2][4][1];
+                    break;
+                case 'introduction':
+                    $strReturn = $this->_objJson[5][2][12][1];
+                    break;
+                case 'links':
+                    $strReturn = $this->_objJson[5][2][9][0];
+                    $arrReturn = array();
+                    foreach ($strReturn as $arrLink) {
+                        $arrReturn[] = array($arrLink[3], $arrLink[1]);
                     }
-                    else {
-                        $arrReturn[$i] = NULL;
+                    return (count($arrReturn)) ? $arrReturn : $this->strNotFound;
+                    break;
+                case 'htmlposts':
+                    $strReturn = $this->_objJson[4][0];
+                    $arrReturn = array();
+                    foreach ($strReturn as $arrPost) {
+                        $arrReturn[] = array($arrPost[4], 'https://plus.google.com/' . $arrPost[19]);
                     }
-                    if (isset($arrReturn[$i-1]) && ($arrReturn[$i-1] == $arrReturn[$i])) {
-                        $arrReturn[$i-1] = NULL;
+                    return (count($arrReturn)) ? $arrReturn : $this->strNotFound;
+                    break;
+                case 'plainposts':
+                    $strReturn = $this->_objJson[4][0];
+                    $arrReturn = array();
+                    foreach ($strReturn as $arrPost) {
+                        $arrReturn[] = array($arrPost[18], 'https://plus.google.com/' . $arrPost[19]);
                     }
-                }
-                else {
-                    $arrReturn[$i] = $this->strNotFound;
-                }
-                $i++;
+                    return (count($arrReturn)) ? $arrReturn : $this->strNotFound;
+                    break;
+                default:
+                    return $this->strNotFound;
             }
-            return $arrReturn;
+            return (trim($strReturn)) ? trim($strReturn) : $this->strNotFound;
         }
         return $this->strNotFound;
     }
-
-    public function getIntroduction() {
-        if (!$this->_strSourceAbout) {
-            $this->fetchUrl($this->strProfileId, 'about');
-        }
-        if ($this->isReady) {
-            if ($strReturn = $this->matchRegex($this->_strSourceAbout, GooglePlus::GPLUS_INTRODUCTION, 1)) {
-                return trim(strip_tags($strReturn));
-            }
-            return $this->strNotFound;
-        }
-        return $this->strNotFound;
-    }
-
-    public function getOccupation() {
-        if (!$this->_strSourceAbout) {
-            $this->fetchUrl($this->strProfileId, 'about');
-        }
-        if ($this->isReady) {
-            if ($strReturn = $this->matchRegex($this->_strSourceAbout, GooglePlus::GPLUS_OCCUPATION, 1)) {
-                return trim(strip_tags($strReturn));
-            }
-            return $this->strNotFound;
-        }
-        return $this->strNotFound;
-    }
-
 }
