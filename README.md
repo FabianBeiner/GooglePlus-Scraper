@@ -1,9 +1,9 @@
 # GooglePlus-Scraper
-v1.0.2
+v1.1.0
 
 **This class can be used to retrieve data from a Google+ profile with PHP. It is rather a proof of concept than something for productive use.**
 
-The technique used is called “web scraping” (see [Wikipedia](http://en.wikipedia.org/wiki/Web_scraping "Web scraping") for details). That means: If Google+ changes anything on their HTML, the script is going to fail.
+The technique used is called “web scraping” (see [Wikipedia](http://en.wikipedia.org/wiki/Web_scraping "Web scraping") for details). That means: If Google+ changes anything on their HTML/JSON, the script is going to fail.
 
 ## Read this!
 
@@ -12,9 +12,7 @@ I recommend not to use this script in any productive environment, just because i
 Yes, it is possible to extend the stuff available to fetch, but I'm bored now and won't go on. Feel free to do so! :)
 
 ## Imaginary things to do
-* Caching!
 * Posting stuff to automatically on Twitter/Facebook (through Cronjob)
-* Better regular expressions
 * …
 
 ### Contributors
@@ -27,4 +25,4 @@ Yes, it is possible to extend the stuff available to fetch, but I'm bored now an
 
 ## Example output (of googleplus.example.php)
 
-![Screenshot](http://i56.tinypic.com/bgcob7.jpg "Screenshot of googleplus.example.php output")
+![Screenshot](http://i55.tinypic.com/2wrq5bo.jpg "Screenshot of googleplus.example.php output")
