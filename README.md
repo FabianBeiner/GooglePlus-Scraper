@@ -18,8 +18,8 @@ Furthermore, be sure to read [Google Terms of Service](http://www.google.com/acc
 * …
 
 ### Contributors
-* [Fabian Beiner](http://wwww.twitter.com/FabianBeiner) *(GooglePlus-Scraper)*
-* [Frank Bültge](http://twitter.com//bueltge) *(RSS-Feed)*
+* [Fabian Beiner](http://twitter.com/FabianBeiner) ([Web](http://fabian-beiner.de)) *(GooglePlus-Scraper)*
+* [Frank Bültge](http://twitter.com/bueltge) *(RSS-Feed)*
 
 ### License
 
