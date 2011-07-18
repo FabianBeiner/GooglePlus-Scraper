@@ -3,13 +3,15 @@ v1.1.0
 
 **This class can be used to retrieve data from a Google+ profile with PHP. It is rather a proof of concept than something for productive use.**
 
-The technique used is called “web scraping” (see [Wikipedia](http://en.wikipedia.org/wiki/Web_scraping "Web scraping") for details). That means: If Google+ changes anything on their HTML/JSON, the script is going to fail.
+The technique used is called [“web scraping”](http://en.wikipedia.org/wiki/Web_scraping "Web scraping"). That means: If Google+ changes anything on their HTML/JSON, the script is going to fail.
 
 ## Read this!
 
 I recommend not to use this script in any productive environment, just because it is not really tested. I've written this within two or three hours, that's it.
 
-Yes, it is possible to extend the stuff available to fetch, but I'm bored now and won't go on. Feel free to do so! :)
+Yes, it is possible to extend the stuff available to fetch, but I'm bored now and won't go on.
+
+Furthermore, be sure to read [Google Terms of Service](http://www.google.com/accounts/TOS), especially section 5.3.
 
 ## Imaginary things to do
 * Posting stuff to automatically on Twitter/Facebook (through Cronjob)
