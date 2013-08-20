@@ -1,4 +1,7 @@
-# GooglePlus-Scraper
+# [DEPRECATED] GooglePlus-Scraper
+
+**This repository is unmaintained. It was a proof of concept and it kicked ass. ;) But nowadays there's an API available for this. Please don't use it.**
+
 v1.1.0
 
 **This class can be used to retrieve data from a Google+ profile with PHP. It is rather a proof of concept than something for productive use.**
